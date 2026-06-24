@@ -1,7 +1,7 @@
 {
   "name": "@brishen/llm-json-schema",
   "private": false,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "Build a JSON Schema to constrain LLM output on OpenAI-compatible endpoints (vLLM, llama.cpp), with an optional React UI.",
   "license": "MIT",
