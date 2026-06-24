@@ -6,6 +6,11 @@ body {
   color: #0f172a;
 }
 
+html.dark body {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
 .demo-shell {
   max-width: 1100px;
   margin: 0 auto;
@@ -21,4 +26,8 @@ body {
   margin: 0 0 20px;
   color: #475569;
   font-size: 14px;
+}
+
+html.dark .demo-header p {
+  color: #94a3b8;
 }

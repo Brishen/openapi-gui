@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import type { BackendId, CompileProfile, SchemaNode } from '../core';
 import { NodeEditor } from './components/NodeEditor';
 import { OutputPanel } from './components/OutputPanel';
 import { ImportDialog } from './components/ImportDialog';
+import { HelpDialog } from './components/HelpDialog';
 import { useSchemaBuilder } from './useSchemaBuilder';
+import { IssuesContext } from './IssuesContext';
 
 export interface SchemaBuilderProps {
   /** Controlled model. When provided, `onChange` must keep it in sync. */
@@ -35,6 +37,7 @@ function UncontrolledBuilder(props: SchemaBuilderProps) {
   const [profile, setProfile] = useState<CompileProfile>(props.profile ?? 'portable');
   const [backend, setBackend] = useState<BackendId | undefined>(props.backend);
   const [importOpen, setImportOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const { model, dispatch, output, issues } = useSchemaBuilder({
     initial: props.defaultValue,
@@ -48,27 +51,38 @@ function UncontrolledBuilder(props: SchemaBuilderProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model]);
 
+  const allIssues = useMemo(() => [...output.issues, ...issues], [output.issues, issues]);
+
   return (
     <Layout
       className={props.className}
       onImportClick={() => setImportOpen(true)}
-      editor={<NodeEditor node={model} dispatch={dispatch} />}
+      onHelpClick={() => setHelpOpen(true)}
+      editor={
+        <IssuesContext.Provider value={allIssues}>
+          <NodeEditor node={model} dispatch={dispatch} />
+        </IssuesContext.Provider>
+      }
       output={
         <OutputPanel
           output={output}
           issues={issues}
           profile={profile}
           backend={backend}
+          model={model}
           onProfileChange={setProfile}
           onBackendChange={setBackend}
         />
       }
       dialog={
-        <ImportDialog
-          open={importOpen}
-          onClose={() => setImportOpen(false)}
-          onImport={(node) => dispatch({ type: 'import', node })}
-        />
+        <>
+          <ImportDialog
+            open={importOpen}
+            onClose={() => setImportOpen(false)}
+            onImport={(node) => dispatch({ type: 'import', node })}
+          />
+          <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
+        </>
       }
     />
   );
@@ -80,6 +94,7 @@ function ControlledBuilder(props: SchemaBuilderProps) {
   const [profile, setProfile] = useState<CompileProfile>(props.profile ?? 'portable');
   const [backend, setBackend] = useState<BackendId | undefined>(props.backend);
   const [importOpen, setImportOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const { model, dispatch, output, issues } = useSchemaBuilder({
     initial: props.value,
@@ -100,27 +115,38 @@ function ControlledBuilder(props: SchemaBuilderProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.value]);
 
+  const allIssues = useMemo(() => [...output.issues, ...issues], [output.issues, issues]);
+
   return (
     <Layout
       className={props.className}
       onImportClick={() => setImportOpen(true)}
-      editor={<NodeEditor node={model} dispatch={dispatch} />}
+      onHelpClick={() => setHelpOpen(true)}
+      editor={
+        <IssuesContext.Provider value={allIssues}>
+          <NodeEditor node={model} dispatch={dispatch} />
+        </IssuesContext.Provider>
+      }
       output={
         <OutputPanel
           output={output}
           issues={issues}
           profile={profile}
           backend={backend}
+          model={model}
           onProfileChange={setProfile}
           onBackendChange={setBackend}
         />
       }
       dialog={
-        <ImportDialog
-          open={importOpen}
-          onClose={() => setImportOpen(false)}
-          onImport={(node) => dispatch({ type: 'import', node })}
-        />
+        <>
+          <ImportDialog
+            open={importOpen}
+            onClose={() => setImportOpen(false)}
+            onImport={(node) => dispatch({ type: 'import', node })}
+          />
+          <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
+        </>
       }
     />
   );
@@ -132,20 +158,27 @@ function Layout({
   output,
   dialog,
   onImportClick,
+  onHelpClick,
 }: {
   className?: string;
   editor: React.ReactNode;
   output: React.ReactNode;
   dialog: React.ReactNode;
   onImportClick: () => void;
+  onHelpClick: () => void;
 }) {
   return (
     <div className={`lss-root ${className ?? ''}`}>
       <div className="lss-header">
         <strong className="lss-title">Schema Builder</strong>
-        <button className="lss-btn" onClick={onImportClick}>
-          Import schema…
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="lss-btn lss-btn-ghost text-slate-500" onClick={onHelpClick}>
+            Help
+          </button>
+          <button className="lss-btn" onClick={onImportClick}>
+            Import schema…
+          </button>
+        </div>
       </div>
       <div className="lss-panes">
         <div className="lss-editor-pane">{editor}</div>

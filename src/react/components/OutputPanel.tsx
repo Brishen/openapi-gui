@@ -3,6 +3,8 @@ import type { BackendId, CompileProfile, CompileResult, Issue } from '../../core
 import { BACKENDS, BACKEND_INFO } from '../../core';
 import { LintList } from './LintList';
 import { TestPanel } from './TestPanel';
+import type { SchemaNode } from '../../core';
+import { generateMock } from '../../core';
 
 /** Right-hand pane: profile + backend selectors, live JSON Schema +
  * response_format with a copy button, and the issue list. */
@@ -11,6 +13,7 @@ export function OutputPanel({
   issues,
   profile,
   backend,
+  model,
   onProfileChange,
   onBackendChange,
 }: {
@@ -18,11 +21,14 @@ export function OutputPanel({
   issues: Issue[];
   profile: CompileProfile;
   backend: BackendId | undefined;
+  model?: SchemaNode;
   onProfileChange: (p: CompileProfile) => void;
   onBackendChange: (b: BackendId | undefined) => void;
 }) {
   const responseFormatJson = JSON.stringify(output.responseFormat, null, 2);
   const allIssues = [...output.issues, ...issues];
+  const [viewMode, setViewMode] = useState<'schema' | 'mock'>('schema');
+  const mockJson = model ? JSON.stringify(generateMock(model), null, 2) : '';
 
   return (
     <div className="lss-output">
@@ -55,7 +61,25 @@ export function OutputPanel({
         </label>
       </div>
 
-      <CodeBlock title="response_format" code={responseFormatJson} />
+      <div>
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '8px' }}>
+          <label className="lss-test-toggle" style={{ color: viewMode === 'schema' ? 'inherit' : 'var(--color-slate-400)', opacity: viewMode === 'schema' ? 1 : 0.5 }}>
+            <input type="radio" name="viewMode" value="schema" checked={viewMode === 'schema'} onChange={() => setViewMode('schema')} style={{ display: 'none' }} />
+            Schema
+          </label>
+          {model && (
+            <label className="lss-test-toggle" style={{ color: viewMode === 'mock' ? 'inherit' : 'var(--color-slate-400)', opacity: viewMode === 'mock' ? 1 : 0.5 }}>
+              <input type="radio" name="viewMode" value="mock" checked={viewMode === 'mock'} onChange={() => setViewMode('mock')} style={{ display: 'none' }} />
+              Mock Data
+            </label>
+          )}
+        </div>
+        {viewMode === 'schema' ? (
+          <CodeBlock title="response_format" code={responseFormatJson} />
+        ) : (
+          <CodeBlock title="mock_data.json" code={mockJson} />
+        )}
+      </div>
 
       <div className="lss-issues">
         <div className="lss-issues-title">Issues</div>

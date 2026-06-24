@@ -66,3 +66,6 @@ export { lint } from './lint';
 // Validate (check a concrete instance against a compiled schema)
 export type { InstanceError, ValidationResult } from './validate';
 export { validateInstance } from './validate';
+
+// Mock
+export { generateMock } from './mock';

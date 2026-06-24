@@ -9,15 +9,18 @@
  */
 @import 'tailwindcss';
 
+/* Use class-based dark mode instead of media queries to prevent clashing with host apps */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Scan the component sources so Tailwind keeps the utilities we use. */
 @source './**/*.tsx';
 
 @layer components {
   .lss-root {
-    @apply flex flex-col gap-3 text-sm text-slate-800;
+    @apply flex flex-col gap-3 text-sm text-slate-800 dark:text-slate-200;
   }
   .lss-header {
-    @apply flex items-center justify-between border-b border-slate-200 pb-2;
+    @apply flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2;
   }
   .lss-title {
     @apply text-base font-semibold;
@@ -33,19 +36,25 @@
   }
 
   .lss-node {
-    @apply rounded-md border border-slate-200 bg-white p-2;
+    @apply rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2;
   }
   .lss-node-label {
-    @apply mb-1 text-xs font-medium uppercase tracking-wide text-slate-500;
+    @apply mb-1 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400;
   }
   .lss-node-row {
     @apply flex flex-wrap items-center gap-2;
   }
   .lss-nested {
-    @apply mt-2 border-l-2 border-slate-100 pl-3;
+    @apply mt-2 border-l-2 border-slate-100 dark:border-slate-700 pl-3;
   }
   .lss-union-option {
     @apply mb-2;
+  }
+  .lss-enum-list {
+    @apply flex flex-col gap-2 mt-1;
+  }
+  .lss-enum-item {
+    @apply flex items-center gap-2;
   }
 
   .lss-object {
@@ -55,17 +64,20 @@
     @apply flex items-center gap-3;
   }
   .lss-property {
-    @apply rounded-md border border-slate-100 bg-slate-50 p-2;
+    @apply rounded-md border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-2;
   }
   .lss-property-head {
     @apply mb-2 flex items-center gap-2;
   }
+  .lss-drag-handle {
+    @apply cursor-grab active:cursor-grabbing text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 select-none px-1 py-1;
+  }
   .lss-empty {
-    @apply text-xs italic text-slate-400;
+    @apply text-xs italic text-slate-400 dark:text-slate-500;
   }
 
   .lss-field {
-    @apply flex flex-col gap-1 text-xs text-slate-600;
+    @apply flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300;
   }
   .lss-field.lss-inline {
     @apply flex-row items-center gap-2;
@@ -76,7 +88,7 @@
   .lss-input,
   .lss-select,
   .lss-textarea {
-    @apply rounded border border-slate-300 bg-white px-2 py-1 text-sm outline-none focus:border-slate-500;
+    @apply rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 py-1 text-sm outline-none focus:border-slate-500 dark:focus:border-slate-400;
   }
   .lss-grow {
     @apply flex-1;
@@ -85,20 +97,20 @@
     @apply w-40 font-mono;
   }
   .lss-checkbox {
-    @apply flex items-center gap-1 text-xs text-slate-600;
+    @apply flex items-center gap-1 text-xs text-slate-600 dark:text-slate-300;
   }
   .lss-spacer {
     @apply flex-1;
   }
 
   .lss-btn {
-    @apply cursor-pointer rounded border border-slate-300 bg-white px-2 py-1 text-xs font-medium hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply cursor-pointer rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40;
   }
   .lss-btn-primary {
-    @apply border-slate-800 bg-slate-800 text-white hover:bg-slate-700;
+    @apply border-slate-800 dark:border-slate-200 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 hover:bg-slate-700 dark:hover:bg-slate-300;
   }
   .lss-btn-ghost {
-    @apply border-transparent bg-transparent hover:bg-slate-100;
+    @apply border-transparent bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700;
   }
 
   .lss-output {
@@ -108,17 +120,17 @@
     @apply flex flex-wrap gap-4;
   }
   .lss-code {
-    @apply overflow-hidden rounded-md border border-slate-200;
+    @apply overflow-hidden rounded-md border border-slate-200 dark:border-slate-700;
   }
   .lss-code-head {
-    @apply flex items-center justify-between bg-slate-100 px-2 py-1 text-xs font-medium;
+    @apply flex items-center justify-between bg-slate-100 dark:bg-slate-800 px-2 py-1 text-xs font-medium;
   }
   .lss-pre {
-    @apply max-h-96 overflow-auto bg-slate-900 p-3 text-xs leading-relaxed text-slate-100;
+    @apply max-h-96 overflow-auto bg-slate-900 dark:bg-black/50 p-3 text-xs leading-relaxed text-slate-100;
   }
 
   .lss-issues-title {
-    @apply mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500;
+    @apply mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400;
   }
   .lss-lint {
     @apply flex flex-col gap-1;
@@ -128,7 +140,7 @@
     @apply rounded px-2 py-1 text-xs;
   }
   .lss-lint-empty {
-    @apply text-slate-400;
+    @apply text-slate-400 dark:text-slate-500;
   }
   .lss-lint-item {
     @apply flex items-center gap-2;
@@ -137,23 +149,23 @@
     @apply rounded px-1 text-[10px] font-bold uppercase;
   }
   .lss-lint-path {
-    @apply font-mono text-slate-500;
+    @apply font-mono text-slate-500 dark:text-slate-400;
   }
   .lss-lint-error {
-    @apply bg-red-50 text-red-700;
+    @apply bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400;
   }
   .lss-lint-warning {
-    @apply bg-amber-50 text-amber-700;
+    @apply bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400;
   }
   .lss-lint-info {
-    @apply bg-sky-50 text-sky-700;
+    @apply bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400;
   }
 
   .lss-test {
-    @apply flex flex-col gap-2 border-t border-slate-200 pt-3;
+    @apply flex flex-col gap-2 border-t border-slate-200 dark:border-slate-700 pt-3;
   }
   .lss-test-toggle {
-    @apply cursor-pointer text-left text-xs font-semibold uppercase tracking-wide text-slate-500 hover:text-slate-700;
+    @apply cursor-pointer text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200;
   }
   .lss-test-textarea {
     @apply font-mono;
@@ -165,17 +177,17 @@
     @apply w-fit rounded px-2 py-0.5 text-xs font-bold uppercase;
   }
   .lss-test-ok {
-    @apply bg-green-100 text-green-700;
+    @apply bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400;
   }
   .lss-test-bad {
-    @apply bg-red-100 text-red-700;
+    @apply bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400;
   }
 
   .lss-modal-backdrop {
-    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4;
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 p-4;
   }
   .lss-modal {
-    @apply flex w-full max-w-lg flex-col gap-3 rounded-lg bg-white p-4 shadow-xl;
+    @apply flex w-full max-w-lg flex-col gap-3 rounded-lg bg-white dark:bg-slate-800 p-4 shadow-xl dark:shadow-black/50 border border-transparent dark:border-slate-700;
   }
   .lss-modal-head {
     @apply flex items-center justify-between;

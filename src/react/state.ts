@@ -45,7 +45,7 @@ export type Action =
   | { type: 'import'; node: SchemaNode }
   | { type: 'patchNode'; id: string; patch: NodePatch }
   | { type: 'changeKind'; id: string; kind: NodeKind }
-  | { type: 'setEnumValues'; id: string; values: (string | number)[] }
+  | { type: 'setEnumValues'; id: string; values: JsonPrimitive[] }
   | { type: 'setExamples'; id: string; values: JsonPrimitive[] }
   | { type: 'setConstValue'; id: string; value: string | number | boolean | null }
   | { type: 'addProperty'; objectId: string }

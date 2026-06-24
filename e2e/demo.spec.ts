@@ -94,4 +94,36 @@ test.describe('demo playground', () => {
     await expect(output).toContainText('"qty"');
     await expect(output).not.toContainText('"address"');
   });
+
+  test('keyboard drag and drop reorders properties', async ({ page }) => {
+    const output = page.getByTestId('output-code');
+    // The starter model has properties [name, age, tags, address]
+    // Wait for the initial output to populate
+    await expect(output).toContainText('"name"');
+    
+    // Grab the full text to check relative positions
+    const initialText = await output.textContent();
+    const initialNameIndex = initialText!.indexOf('"name": {');
+    const initialAgeIndex = initialText!.indexOf('"age": {');
+    expect(initialNameIndex).toBeLessThan(initialAgeIndex);
+
+    // Focus the drag handle of the first property ('name')
+    const firstDragHandle = page.locator('.lss-drag-handle').first();
+    await firstDragHandle.focus();
+
+    // Use dnd-kit's keyboard controls: Space to pick up, ArrowDown to move, Space to drop
+    await page.keyboard.press('Space');
+    // Wait for the pickup announcement/state change
+    await page.waitForTimeout(100);
+    await page.keyboard.press('ArrowDown');
+    await page.waitForTimeout(100);
+    await page.keyboard.press('Space');
+    await page.waitForTimeout(100);
+
+    // Check the new output string
+    const updatedText = await output.textContent();
+    const newNameIndex = updatedText!.indexOf('"name": {');
+    const newAgeIndex = updatedText!.indexOf('"age": {');
+    expect(newAgeIndex).toBeLessThan(newNameIndex);
+  });
 });

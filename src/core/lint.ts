@@ -10,8 +10,10 @@
 
 import type { BackendId, TrackedKeyword } from './backends';
 import { BACKEND_INFO, supportFor } from './backends';
+import { compile } from './compile';
 import type { CompileProfile } from './compile';
-import type { ArrayNode, NumberNode, ObjectNode, SchemaNode, StringNode } from './model';
+import type { ArrayNode, EnumNode, NumberNode, ObjectNode, SchemaNode, StringNode } from './model';
+import { validateInstance } from './validate';
 
 export interface Issue {
   level: 'error' | 'warning' | 'info';
@@ -60,8 +62,10 @@ function walk(node: SchemaNode, path: string, ctx: LintCtx): void {
       node.options.forEach((opt, i) => walk(opt, `${path}|${i}`, ctx));
       break;
     case 'boolean':
-    case 'enum':
     case 'const':
+      break;
+    case 'enum':
+      enumChecks(node, path, ctx);
       break;
   }
 }
@@ -77,6 +81,24 @@ function qualityChecks(node: SchemaNode, path: string, ctx: LintCtx): void {
       nodeId: node.id,
       path,
     });
+  }
+
+  // Examples should be valid against their own constraints.
+  if (node.examples && node.examples.length > 0) {
+    const { schema } = compile(node, { profile: 'portable' });
+    for (const example of node.examples) {
+      const res = validateInstance(schema, example);
+      if (!res.valid) {
+        const msg = res.errors.map((e) => e.message).join(', ');
+        ctx.issues.push({
+          level: 'error',
+          rule: 'invalid-example',
+          message: `Example "${example}" is invalid: ${msg}`,
+          nodeId: node.id,
+          path,
+        });
+      }
+    }
   }
 }
 
@@ -108,6 +130,38 @@ function stringChecks(node: StringNode, path: string, ctx: LintCtx): void {
   if (node.format) backendCheck('format', node, path, ctx);
   if (node.minLength !== undefined) backendCheck('minLength', node, path, ctx);
   if (node.maxLength !== undefined) backendCheck('maxLength', node, path, ctx);
+
+  if (node.minLength !== undefined && node.minLength < 0) {
+    ctx.issues.push({
+      level: 'error',
+      rule: 'invalid-minLength',
+      message: 'Min length must be >= 0.',
+      nodeId: node.id,
+      path,
+    });
+  }
+  if (node.maxLength !== undefined && node.maxLength <= 0) {
+    ctx.issues.push({
+      level: 'error',
+      rule: 'invalid-maxLength',
+      message: 'Max length must be greater than 0.',
+      nodeId: node.id,
+      path,
+    });
+  }
+  if (
+    node.minLength !== undefined &&
+    node.maxLength !== undefined &&
+    node.minLength > node.maxLength
+  ) {
+    ctx.issues.push({
+      level: 'error',
+      rule: 'invalid-length-range',
+      message: 'Max length must be greater than or equal to min length.',
+      nodeId: node.id,
+      path,
+    });
+  }
 }
 
 function numberChecks(node: NumberNode, path: string, ctx: LintCtx): void {
@@ -148,4 +202,26 @@ function arrayChecks(node: ArrayNode, path: string, ctx: LintCtx): void {
   if (node.maxItems !== undefined) backendCheck('maxItems', node, path, ctx);
   if (node.uniqueItems) backendCheck('uniqueItems', node, path, ctx);
   walk(node.items, `${path}[]`, ctx);
+}
+
+function enumChecks(node: EnumNode, path: string, ctx: LintCtx): void {
+  if (node.values.length === 0) {
+    ctx.issues.push({
+      level: 'error',
+      rule: 'empty-enum',
+      message: 'Enum has no values — it cannot be satisfied.',
+      nodeId: node.id,
+      path,
+    });
+  }
+  const uniqueValues = new Set(node.values);
+  if (uniqueValues.size < node.values.length) {
+    ctx.issues.push({
+      level: 'error',
+      rule: 'duplicate-enum',
+      message: 'Enum contains duplicate values.',
+      nodeId: node.id,
+      path,
+    });
+  }
 }
