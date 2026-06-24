@@ -7,7 +7,7 @@ use it to constrain output on **OpenAI-compatible guided-decoding endpoints**
 - **Framework-free core** — compile a small editor model to JSON Schema +
   an OpenAI `response_format`, parse an existing schema back, and lint it against
   specific decoding backends.
-- **Optional React UI** — a visual builder (`llm-json-schema/react`) for people
+- **Optional React UI** — a visual builder (`@brishen/llm-json-schema/react`) for people
   with light programming knowledge. React is an optional peer dependency.
 
 > The repo directory is historically named `openapi-gui`, but the package targets
@@ -38,7 +38,7 @@ import {
   arrayNode,
   property,
   compile,
-} from 'llm-json-schema';
+} from '@brishen/llm-json-schema';
 
 const model = objectNode({
   title: 'Person',
@@ -89,7 +89,7 @@ llama.cpp GBNF). Use `strict` when targeting OpenAI strict structured outputs.
 ### Round-trip an existing schema
 
 ```ts
-import { parse, compile } from 'llm-json-schema';
+import { parse, compile } from '@brishen/llm-json-schema';
 
 const { node, unsupported } = parse(existingJsonSchema);
 // `unsupported` lists keywords the model doesn't represent (warn, don't drop).
@@ -104,7 +104,7 @@ round-trips as required-nullable.
 ### Lint against a backend
 
 ```ts
-import { lint } from 'llm-json-schema';
+import { lint } from '@brishen/llm-json-schema';
 
 const problems = lint(node, { backend: 'llamacpp' });
 // e.g. warns that `pattern` is unsupported and `format` is ignored on llama.cpp,
@@ -116,8 +116,8 @@ const problems = lint(node, { backend: 'llamacpp' });
 ![The SchemaBuilder demo: a node-tree editor on the left, live JSON Schema / response_format and lint issues on the right.](docs/demo.png)
 
 ```tsx
-import { SchemaBuilder } from 'llm-json-schema/react';
-import 'llm-json-schema/styles.css'; // prebuilt — no Tailwind setup needed
+import { SchemaBuilder } from '@brishen/llm-json-schema/react';
+import '@brishen/llm-json-schema/styles.css'; // prebuilt — no Tailwind setup needed
 
 export function App() {
   return <SchemaBuilder defaultValue={/* optional initial model */ undefined} />;
@@ -132,7 +132,7 @@ pasting an existing schema.
 Prefer your own UI? Use the headless hook:
 
 ```tsx
-import { useSchemaBuilder } from 'llm-json-schema/react';
+import { useSchemaBuilder } from '@brishen/llm-json-schema/react';
 
 const { model, dispatch, output, issues } = useSchemaBuilder({
   profile: 'strict',
