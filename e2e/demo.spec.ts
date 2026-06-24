@@ -26,6 +26,21 @@ test.describe('demo playground', () => {
     await expect(output).toContainText('"field"');
   });
 
+  test('adding an example value emits it into the schema', async ({ page }) => {
+    const output = page.getByTestId('output-code');
+    await expect(output).not.toContainText('"examples"');
+
+    // The "name" string field is the first node with an examples input.
+    await page
+      .locator('.lss-editor-pane')
+      .getByPlaceholder('e.g. Ada, Grace')
+      .first()
+      .fill('Ada, Grace');
+
+    await expect(output).toContainText('"examples"');
+    await expect(output).toContainText('"Ada"');
+  });
+
   test('switching to the strict profile sets strict:true', async ({ page }) => {
     const output = page.getByTestId('output-code');
     await expect(output).toContainText('"strict": false');

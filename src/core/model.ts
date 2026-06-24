@@ -25,6 +25,8 @@ export interface NodeBase {
   id: string;
   title?: string;
   description?: string;
+  /** Example values emitted as the JSON Schema `examples` annotation. */
+  examples?: JsonPrimitive[];
   /** When true, the compiled schema also permits `null` for this node. */
   nullable?: boolean;
 }

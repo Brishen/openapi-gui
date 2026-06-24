@@ -36,7 +36,9 @@ import {
 const model = objectNode({
   title: 'Person',
   properties: [
-    property('name', stringNode({ description: 'Full name' })),
+    // `examples` are emitted as the JSON Schema `examples` annotation and help
+    // the model fill the field:
+    property('name', stringNode({ description: 'Full name', examples: ['Ada Lovelace'] })),
     property('age', integerNode({ description: 'Age in years', minimum: 0 })),
     property('tags', arrayNode(stringNode())),
     // optional field:

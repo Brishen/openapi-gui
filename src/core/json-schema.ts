@@ -25,6 +25,8 @@ export interface JsonSchema {
   type?: JsonSchemaType | JsonSchemaType[];
   title?: string;
   description?: string;
+  /** Annotation values that illustrate valid data (JSON Schema 2020-12). */
+  examples?: JsonPrimitive[];
 
   // composition
   anyOf?: JsonSchema[];

@@ -5,7 +5,7 @@
  * derives the JSON Schema and lint issues from the model with useMemo.
  */
 
-import type { NodeKind, ObjectNode, SchemaNode, StringFormat } from '../core';
+import type { JsonPrimitive, NodeKind, ObjectNode, SchemaNode, StringFormat } from '../core';
 import {
   arrayNode,
   booleanNode,
@@ -46,6 +46,7 @@ export type Action =
   | { type: 'patchNode'; id: string; patch: NodePatch }
   | { type: 'changeKind'; id: string; kind: NodeKind }
   | { type: 'setEnumValues'; id: string; values: (string | number)[] }
+  | { type: 'setExamples'; id: string; values: JsonPrimitive[] }
   | { type: 'setConstValue'; id: string; value: string | number | boolean | null }
   | { type: 'addProperty'; objectId: string }
   | { type: 'removeProperty'; objectId: string; index: number }
@@ -70,6 +71,12 @@ export function reducer(state: SchemaNode, action: Action): SchemaNode {
       return mapNode(state, action.id, (node) =>
         node.kind === 'enum' ? { ...node, values: action.values } : node,
       );
+
+    case 'setExamples':
+      return mapNode(state, action.id, (node) => ({
+        ...node,
+        examples: action.values.length > 0 ? action.values : undefined,
+      }));
 
     case 'setConstValue':
       return mapNode(state, action.id, (node) =>

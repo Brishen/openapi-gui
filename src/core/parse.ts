@@ -7,7 +7,7 @@
  * than silently drop it.
  */
 
-import type { JsonSchema, JsonSchemaType } from './json-schema';
+import type { JsonPrimitive, JsonSchema, JsonSchemaType } from './json-schema';
 import type { ObjectProperty, SchemaNode, StringFormat } from './model';
 import {
   arrayNode,
@@ -34,6 +34,10 @@ interface ParseCtx {
   refStack: Set<string>;
 }
 
+/** Shared node metadata pulled off a schema and threaded into the factories. */
+type Meta = { title?: string; description?: string; examples?: JsonPrimitive[] };
+type Base = Meta & { nullable?: boolean };
+
 /** Keywords we knowingly map; everything else gets reported as unsupported. */
 const KNOWN_KEYWORDS = new Set([
   '$schema',
@@ -42,6 +46,7 @@ const KNOWN_KEYWORDS = new Set([
   'type',
   'title',
   'description',
+  'examples',
   'anyOf',
   'enum',
   'const',
@@ -129,7 +134,11 @@ function parseNode(schema: JsonSchema, ctx: ParseCtx): SchemaNode {
 
   reportUnknownKeywords(schema, ctx);
 
-  const meta = { title: schema.title, description: schema.description };
+  const meta = {
+    title: schema.title,
+    description: schema.description,
+    examples: schema.examples && schema.examples.length > 0 ? schema.examples : undefined,
+  };
 
   // anyOf -> union (unless it is purely a "T | null" widening)
   if (schema.anyOf) {
@@ -170,7 +179,7 @@ function parseNode(schema: JsonSchema, ctx: ParseCtx): SchemaNode {
 function parseAnyOf(
   schema: JsonSchema,
   ctx: ParseCtx,
-  meta: { title?: string; description?: string },
+  meta: Meta,
 ): SchemaNode {
   const branches = schema.anyOf ?? [];
   const nullBranches = branches.filter((b) => b.type === 'null');
@@ -191,7 +200,7 @@ function parseAnyOf(
 
 function parseString(
   schema: JsonSchema,
-  base: { title?: string; description?: string; nullable?: boolean },
+  base: Base,
 ) {
   const format =
     schema.format && STRING_FORMATS.has(schema.format)
@@ -231,7 +240,7 @@ function numberEnum(schema: JsonSchema): number[] | undefined {
 function parseObject(
   schema: JsonSchema,
   ctx: ParseCtx,
-  base: { title?: string; description?: string; nullable?: boolean },
+  base: Base,
 ) {
   const required = new Set(schema.required ?? []);
   // Null-widening is always read as `nullable`; `required` membership is read as
@@ -256,7 +265,7 @@ function parseObject(
 function parseArray(
   schema: JsonSchema,
   ctx: ParseCtx,
-  base: { title?: string; description?: string; nullable?: boolean },
+  base: Base,
 ) {
   const items = schema.items ? parseNode(schema.items, ctx) : stringNode();
   if (!schema.items) ctx.unsupported.add('array without items');

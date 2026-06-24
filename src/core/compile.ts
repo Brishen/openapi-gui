@@ -83,6 +83,7 @@ function compileNode(node: SchemaNode, ctx: Ctx): JsonSchema {
 function attachMeta(node: SchemaNode, schema: JsonSchema): void {
   if (node.title) schema.title = node.title;
   if (node.description) schema.description = node.description;
+  if (node.examples && node.examples.length > 0) schema.examples = [...node.examples];
 }
 
 /**

@@ -1,9 +1,38 @@
 import type { Dispatch } from 'react';
-import type { NodeKind, SchemaNode } from '../../core';
+import type { JsonPrimitive, NodeKind, SchemaNode } from '../../core';
 import type { Action } from '../state';
 import { ConstraintsPanel } from './ConstraintsPanel';
 import { ObjectFields } from './ObjectFields';
 import { TypePicker } from './TypePicker';
+
+// Examples are most useful on scalar leaves; object/array/union examples would
+// be whole structures, which a comma-separated field can't express.
+const EXAMPLE_KINDS: ReadonlySet<NodeKind> = new Set<NodeKind>([
+  'string',
+  'number',
+  'integer',
+  'boolean',
+  'enum',
+]);
+
+/** Parse a comma-separated examples field, coercing to the node's value type. */
+function parseExamples(raw: string, kind: NodeKind): JsonPrimitive[] {
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+    .map((s): JsonPrimitive => {
+      if (kind === 'number' || kind === 'integer') {
+        const n = Number(s);
+        return Number.isNaN(n) ? s : n;
+      }
+      if (kind === 'boolean') {
+        if (s === 'true') return true;
+        if (s === 'false') return false;
+      }
+      return s;
+    });
+}
 
 /**
  * Recursive editor for a single node. Renders shared metadata + a type picker +
@@ -52,6 +81,24 @@ export function NodeEditor({
       </div>
 
       <ConstraintsPanel node={node} dispatch={dispatch} />
+
+      {EXAMPLE_KINDS.has(node.kind) && (
+        <label className="lss-field">
+          <span>Examples (comma-separated)</span>
+          <input
+            className="lss-input"
+            placeholder="e.g. Ada, Grace"
+            value={(node.examples ?? []).map((v) => String(v)).join(', ')}
+            onChange={(e) =>
+              dispatch({
+                type: 'setExamples',
+                id: node.id,
+                values: parseExamples(e.target.value, node.kind),
+              })
+            }
+          />
+        </label>
+      )}
 
       {node.kind === 'object' && <ObjectFields node={node} dispatch={dispatch} depth={depth} />}
 
