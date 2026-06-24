@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { BackendId, CompileProfile, CompileResult, Issue } from '../../core';
 import { BACKENDS, BACKEND_INFO } from '../../core';
 import { LintList } from './LintList';
+import { TestPanel } from './TestPanel';
 
 /** Right-hand pane: profile + backend selectors, live JSON Schema +
  * response_format with a copy button, and the issue list. */
@@ -60,6 +61,8 @@ export function OutputPanel({
         <div className="lss-issues-title">Issues</div>
         <LintList issues={allIssues} />
       </div>
+
+      <TestPanel schema={output.schema} />
     </div>
   );
 }

@@ -50,6 +50,31 @@ test.describe('demo playground', () => {
     await expect(output).toContainText('"strict": true');
   });
 
+  test('testing a JSON object validates it against the schema', async ({ page }) => {
+    await page.getByRole('button', { name: 'Test JSON' }).click();
+
+    const input = page.getByTestId('test-input');
+    const result = page.getByTestId('test-result');
+
+    // A conforming instance for the starter model passes.
+    await input.fill(
+      JSON.stringify({
+        name: 'Ada',
+        age: 36,
+        tags: ['math'],
+        address: { city: 'London', zip: '12345' },
+      }),
+    );
+    await page.getByTestId('test-run').click();
+    await expect(result).toHaveText(/Valid/);
+
+    // A non-conforming instance fails with errors.
+    await input.fill(JSON.stringify({ name: 'Ada', age: -1, address: { zip: 'abc' } }));
+    await page.getByTestId('test-run').click();
+    await expect(result).toHaveText(/Invalid/);
+    await expect(page.locator('.lss-test .lss-lint-error').first()).toBeVisible();
+  });
+
   test('importing a pasted schema rebuilds the editor and output', async ({ page }) => {
     await page.getByRole('button', { name: 'Import schema…' }).click();
 
