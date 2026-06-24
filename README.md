@@ -1,75 +1,161 @@
-# React + TypeScript + Vite
+# llm-json-schema
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Build a **JSON Schema** that describes the object you want an LLM to return, then
+use it to constrain output on **OpenAI-compatible guided-decoding endpoints**
+(vLLM, llama.cpp) running models like gemma-4, nemotron-3, or qwen-3.6.
 
-Currently, two official plugins are available:
+- **Framework-free core** — compile a small editor model to JSON Schema +
+  an OpenAI `response_format`, parse an existing schema back, and lint it against
+  specific decoding backends.
+- **Optional React UI** — a visual builder (`llm-json-schema/react`) for people
+  with light programming knowledge. React is an optional peer dependency.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+> The repo directory is historically named `openapi-gui`, but the package targets
+> **JSON Schema**, not OpenAPI.
 
-## React Compiler
+## Install
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```sh
+npm install llm-json-schema
+# React UI is optional; bring your own React 18/19:
+npm install react react-dom
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Core usage (no framework)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```ts
+import {
+  objectNode,
+  stringNode,
+  integerNode,
+  arrayNode,
+  property,
+  compile,
+} from 'llm-json-schema';
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+const model = objectNode({
+  title: 'Person',
+  properties: [
+    // `examples` are emitted as the JSON Schema `examples` annotation and help
+    // the model fill the field:
+    property('name', stringNode({ description: 'Full name', examples: ['Ada Lovelace'] })),
+    property('age', integerNode({ description: 'Age in years', minimum: 0 })),
+    property('tags', arrayNode(stringNode())),
+    // optional field:
+    property('nickname', stringNode(), /* required */ false),
+  ],
+});
 
+const { schema, responseFormat, issues } = compile(model, {
+  profile: 'portable', // or 'strict'
+  name: 'person',
+});
 ```
+
+Drop `responseFormat` straight into a chat-completions request:
+
+```ts
+await fetch('http://localhost:8000/v1/chat/completions', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    model: 'gemma-4',
+    messages: [{ role: 'user', content: 'Describe Ada Lovelace.' }],
+    response_format: responseFormat,
+  }),
+});
+```
+
+### Compile profiles
+
+Guided-decoding backends support different slices of JSON Schema, so `compile`
+offers two shapes:
+
+| Profile              | Optional properties                                  | `additionalProperties`           | `strict` |
+| -------------------- | ---------------------------------------------------- | -------------------------------- | -------- |
+| `portable` (default) | omitted from `required`                              | `false` (your choice per object) | `false`  |
+| `strict` (OpenAI)    | listed in `required`, type widened to `["T","null"]` | forced `false` on every object   | `true`   |
+
+Use `portable` for the broadest backend compatibility (xgrammar / outlines /
+llama.cpp GBNF). Use `strict` when targeting OpenAI strict structured outputs.
+
+### Round-trip an existing schema
+
+```ts
+import { parse, compile } from 'llm-json-schema';
+
+const { node, unsupported } = parse(existingJsonSchema);
+// `unsupported` lists keywords the model doesn't represent (warn, don't drop).
+const { schema } = compile(node, { profile: 'portable' });
+```
+
+The portable round-trip (`parse(compile(model).schema)`) reproduces the model for
+supported features. The strict profile's optional-encoding is inherently
+ambiguous with a required-nullable property, so a strict-compiled optional field
+round-trips as required-nullable.
+
+### Lint against a backend
+
+```ts
+import { lint } from 'llm-json-schema';
+
+const problems = lint(node, { backend: 'llamacpp' });
+// e.g. warns that `pattern` is unsupported and `format` is ignored on llama.cpp,
+// plus quality nudges like "this field has no description".
+```
+
+## React UI
+
+![The SchemaBuilder demo: a node-tree editor on the left, live JSON Schema / response_format and lint issues on the right.](docs/demo.png)
+
+```tsx
+import { SchemaBuilder } from 'llm-json-schema/react';
+import 'llm-json-schema/styles.css'; // prebuilt — no Tailwind setup needed
+
+export function App() {
+  return <SchemaBuilder defaultValue={/* optional initial model */ undefined} />;
+}
+```
+
+`<SchemaBuilder>` works controlled (`value` + `onChange`) or uncontrolled
+(`defaultValue`). It shows a node-tree editor on the left and the live JSON
+Schema + `response_format` + lint issues on the right, with an import dialog for
+pasting an existing schema.
+
+Prefer your own UI? Use the headless hook:
+
+```tsx
+import { useSchemaBuilder } from 'llm-json-schema/react';
+
+const { model, dispatch, output, issues } = useSchemaBuilder({
+  profile: 'strict',
+  backend: 'vllm-xgrammar',
+});
+```
+
+All UI classes are prefixed `lss-` to avoid collisions in host apps.
+
+## Development
+
+```sh
+npm run dev        # demo playground (src/demo) on the Vite dev server
+npm test           # vitest: compile, round-trip, Ajv validation, lint rules
+npm run test:e2e   # playwright: drives the demo GUI in a browser
+npm run typecheck  # tsc -b
+npm run lint       # eslint
+npm run build      # library ESM build (dist/) + prebuilt dist/styles.css
+```
+
+> Playwright needs a browser: `npx playwright install chromium`. The e2e config
+> boots the Vite dev server itself. Regenerate the screenshot above with
+> `node scripts/screenshot.mjs` while the dev server is running.
+
+### Verifying against a real backend (manual)
+
+Start a local vLLM or llama.cpp OpenAI server, POST the generated
+`response_format`, and confirm the completion parses against `schema` (e.g. with
+Ajv). This step is documented rather than automated.
+
+## License
+
+MIT
