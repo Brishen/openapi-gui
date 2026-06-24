@@ -1,0 +1,83 @@
+name: Screenshot
+
+# Capture a screenshot of the demo GUI on every pull request and attach it to
+# the PR (as a workflow artifact and embedded in a sticky comment).
+on:
+  pull_request:
+
+# Allow pushing the screenshot to the `screenshots` branch and commenting on PRs.
+permissions:
+  contents: write
+  pull-requests: write
+
+# Cancel superseded runs for the same PR.
+concurrency:
+  group: screenshot-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start dev server
+        run: |
+          npm run dev -- --port 5174 --strictPort &
+          npx -y wait-on http://localhost:5174 --timeout 60000
+
+      - name: Capture screenshot
+        run: node scripts/screenshot.mjs http://localhost:5174
+
+      - name: Upload screenshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-screenshot
+          path: docs/demo.png
+
+      - name: Publish screenshot to screenshots branch
+        id: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          dest="pr-${PR}.png"
+          tmp="$(mktemp -d)"
+          cp docs/demo.png "$tmp/$dest"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Use an orphan branch dedicated to screenshots so we don't pollute history.
+          git fetch origin screenshots && git checkout screenshots || git checkout --orphan screenshots
+          git rm -rf . >/dev/null 2>&1 || true
+          cp "$tmp/$dest" "$dest"
+          git add "$dest"
+          git commit -m "Screenshot for PR #${PR}" || echo "No changes to commit"
+          git push origin HEAD:screenshots
+
+          url="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/screenshots/${dest}"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Comment screenshot on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: demo-screenshot
+          message: |
+            ### Demo screenshot
+
+            ![demo](${{ steps.publish.outputs.url }})
+
+            <sub>Updated automatically for commit ${{ github.event.pull_request.head.sha }}.</sub>
