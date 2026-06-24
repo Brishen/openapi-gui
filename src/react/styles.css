@@ -1,0 +1,164 @@
+/*
+ * Prebuilt stylesheet for the React UI. Built to dist/styles.css via the
+ * `build:css` script (@tailwindcss/cli). Consumers import it once:
+ *   import "llm-json-schema/styles.css";
+ *
+ * All component classes are authored as plain `lss-*` utility compositions via
+ * @apply so the output CSS is self-contained and collision-resistant in host
+ * apps regardless of the host's own Tailwind setup (or lack of one).
+ */
+@import 'tailwindcss';
+
+/* Scan the component sources so Tailwind keeps the utilities we use. */
+@source './**/*.tsx';
+
+@layer components {
+  .lss-root {
+    @apply flex flex-col gap-3 text-sm text-slate-800;
+  }
+  .lss-header {
+    @apply flex items-center justify-between border-b border-slate-200 pb-2;
+  }
+  .lss-title {
+    @apply text-base font-semibold;
+  }
+  .lss-panes {
+    @apply grid grid-cols-1 gap-4 md:grid-cols-2;
+  }
+  .lss-editor-pane {
+    @apply min-w-0;
+  }
+  .lss-output-pane {
+    @apply min-w-0;
+  }
+
+  .lss-node {
+    @apply rounded-md border border-slate-200 bg-white p-2;
+  }
+  .lss-node-label {
+    @apply mb-1 text-xs font-medium uppercase tracking-wide text-slate-500;
+  }
+  .lss-node-row {
+    @apply flex flex-wrap items-center gap-2;
+  }
+  .lss-nested {
+    @apply mt-2 border-l-2 border-slate-100 pl-3;
+  }
+  .lss-union-option {
+    @apply mb-2;
+  }
+
+  .lss-object {
+    @apply mt-2 flex flex-col gap-2;
+  }
+  .lss-object-toolbar {
+    @apply flex items-center gap-3;
+  }
+  .lss-property {
+    @apply rounded-md border border-slate-100 bg-slate-50 p-2;
+  }
+  .lss-property-head {
+    @apply mb-2 flex items-center gap-2;
+  }
+  .lss-empty {
+    @apply text-xs italic text-slate-400;
+  }
+
+  .lss-field {
+    @apply flex flex-col gap-1 text-xs text-slate-600;
+  }
+  .lss-field.lss-inline {
+    @apply flex-row items-center gap-2;
+  }
+  .lss-constraints {
+    @apply mt-2 flex flex-wrap gap-3;
+  }
+  .lss-input,
+  .lss-select,
+  .lss-textarea {
+    @apply rounded border border-slate-300 bg-white px-2 py-1 text-sm outline-none focus:border-slate-500;
+  }
+  .lss-grow {
+    @apply flex-1;
+  }
+  .lss-key {
+    @apply w-40 font-mono;
+  }
+  .lss-checkbox {
+    @apply flex items-center gap-1 text-xs text-slate-600;
+  }
+  .lss-spacer {
+    @apply flex-1;
+  }
+
+  .lss-btn {
+    @apply cursor-pointer rounded border border-slate-300 bg-white px-2 py-1 text-xs font-medium hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .lss-btn-primary {
+    @apply border-slate-800 bg-slate-800 text-white hover:bg-slate-700;
+  }
+  .lss-btn-ghost {
+    @apply border-transparent bg-transparent hover:bg-slate-100;
+  }
+
+  .lss-output {
+    @apply flex flex-col gap-3;
+  }
+  .lss-output-controls {
+    @apply flex flex-wrap gap-4;
+  }
+  .lss-code {
+    @apply overflow-hidden rounded-md border border-slate-200;
+  }
+  .lss-code-head {
+    @apply flex items-center justify-between bg-slate-100 px-2 py-1 text-xs font-medium;
+  }
+  .lss-pre {
+    @apply max-h-96 overflow-auto bg-slate-900 p-3 text-xs leading-relaxed text-slate-100;
+  }
+
+  .lss-issues-title {
+    @apply mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500;
+  }
+  .lss-lint {
+    @apply flex flex-col gap-1;
+  }
+  .lss-lint-empty,
+  .lss-lint-item {
+    @apply rounded px-2 py-1 text-xs;
+  }
+  .lss-lint-empty {
+    @apply text-slate-400;
+  }
+  .lss-lint-item {
+    @apply flex items-center gap-2;
+  }
+  .lss-lint-badge {
+    @apply rounded px-1 text-[10px] font-bold uppercase;
+  }
+  .lss-lint-path {
+    @apply font-mono text-slate-500;
+  }
+  .lss-lint-error {
+    @apply bg-red-50 text-red-700;
+  }
+  .lss-lint-warning {
+    @apply bg-amber-50 text-amber-700;
+  }
+  .lss-lint-info {
+    @apply bg-sky-50 text-sky-700;
+  }
+
+  .lss-modal-backdrop {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4;
+  }
+  .lss-modal {
+    @apply flex w-full max-w-lg flex-col gap-3 rounded-lg bg-white p-4 shadow-xl;
+  }
+  .lss-modal-head {
+    @apply flex items-center justify-between;
+  }
+  .lss-modal-actions {
+    @apply flex justify-end gap-2;
+  }
+}
