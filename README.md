@@ -10,8 +10,6 @@ use it to constrain output on **OpenAI-compatible guided-decoding endpoints**
 - **Optional React UI** — a visual builder (`@brishen/llm-json-schema/react`) for people
   with light programming knowledge. React is an optional peer dependency.
 
-> The repo directory is historically named `openapi-gui`, but the package targets
-> **JSON Schema**, not OpenAPI.
 
 ## Install
 
