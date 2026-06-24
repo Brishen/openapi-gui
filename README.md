@@ -15,11 +15,18 @@ use it to constrain output on **OpenAI-compatible guided-decoding endpoints**
 
 ## Install
 
+The package is published to the **GitHub Packages** npm registry, so point the
+`@brishen` scope at it first:
+
 ```sh
-npm install llm-json-schema
+echo "@brishen:registry=https://npm.pkg.github.com" >> .npmrc
+npm install @brishen/llm-json-schema
 # React UI is optional; bring your own React 18/19:
 npm install react react-dom
 ```
+
+Installing from GitHub Packages requires authenticating `npm` with a GitHub
+token that has `read:packages` (see [Releasing](#releasing)).
 
 ## Core usage (no framework)
 
@@ -155,6 +162,34 @@ npm run build      # library ESM build (dist/) + prebuilt dist/styles.css
 Start a local vLLM or llama.cpp OpenAI server, POST the generated
 `response_format`, and confirm the completion parses against `schema` (e.g. with
 Ajv). This step is documented rather than automated.
+
+## Releasing
+
+The package is published to the **GitHub Packages** npm registry by
+`.github/workflows/publish.yml`, which runs when a GitHub Release is published.
+The release tag drives the published version, so keep the tag and
+`package.json` version in sync by letting `npm version` create both:
+
+```sh
+git checkout main && git pull
+npm version minor          # bumps package.json, commits, and tags vX.Y.Z
+                           # use patch | major, an explicit number, or
+                           # `npm version prerelease --preid=rc` for prereleases
+git push --follow-tags     # push the commit and the tag together
+
+# Create the Release from that tag — this triggers the publish workflow:
+gh release create "v$(node -p "require('./package.json').version")" --generate-notes
+```
+
+For the **first** release, use an explicit number (`npm version 0.1.0`) since the
+repo starts at `0.0.0`.
+
+Consumers install from the GitHub registry with an `.npmrc` that maps the scope:
+
+```sh
+echo "@brishen:registry=https://npm.pkg.github.com" >> .npmrc
+npm install @brishen/llm-json-schema
+```
 
 ## License
 
