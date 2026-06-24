@@ -19,4 +19,12 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // Public entry barrels intentionally re-export both components and
+    // helpers; the react-refresh HMR rule doesn't apply to library exports.
+    files: ['src/react/index.tsx', 'src/core/index.ts'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])
