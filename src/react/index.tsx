@@ -25,3 +25,4 @@ export { TypePicker } from './components/TypePicker';
 export { OutputPanel } from './components/OutputPanel';
 export { LintList } from './components/LintList';
 export { ImportDialog } from './components/ImportDialog';
+export { GenerateCodeDialog } from './components/GenerateCodeDialog';

@@ -26,7 +26,10 @@
     @apply text-base font-semibold;
   }
   .lss-panes {
-    @apply grid grid-cols-1 gap-4 md:grid-cols-2;
+    @apply grid grid-cols-1 gap-4 lg:grid-cols-[200px_minmax(0,1fr)_minmax(0,1fr)];
+  }
+  .lss-outline-pane {
+    @apply min-w-0 hidden lg:block;
   }
   .lss-editor-pane {
     @apply min-w-0;
@@ -35,8 +38,27 @@
     @apply min-w-0;
   }
 
+  .lss-outline {
+    @apply flex flex-col gap-2 sticky top-4;
+  }
+  .lss-outline-title {
+    @apply text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1;
+  }
+  .lss-outline-item {
+    @apply flex items-center justify-between cursor-pointer py-1 px-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors;
+  }
+  .lss-outline-name {
+    @apply text-sm truncate mr-2 font-medium;
+  }
+  .lss-outline-kind {
+    @apply text-[10px] text-slate-400 dark:text-slate-500 uppercase font-mono;
+  }
+  .lss-outline-children {
+    @apply pl-3 border-l border-slate-200 dark:border-slate-700 ml-2 mt-1 flex flex-col gap-1;
+  }
+
   .lss-node {
-    @apply rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2;
+    @apply py-2 relative;
   }
   .lss-node-label {
     @apply mb-1 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400;
@@ -45,10 +67,10 @@
     @apply flex flex-wrap items-center gap-2;
   }
   .lss-nested {
-    @apply mt-2 border-l-2 border-slate-100 dark:border-slate-700 pl-3;
+    @apply mt-2 border-l-2 border-slate-200 dark:border-slate-700 pl-4 ml-1;
   }
   .lss-union-option {
-    @apply mb-2;
+    @apply mb-4 pb-4 border-b border-slate-200 dark:border-slate-700 last:border-0;
   }
   .lss-enum-list {
     @apply flex flex-col gap-2 mt-1;
@@ -58,13 +80,13 @@
   }
 
   .lss-object {
-    @apply mt-2 flex flex-col gap-2;
+    @apply mt-4 flex flex-col;
   }
   .lss-object-toolbar {
-    @apply flex items-center gap-3;
+    @apply mt-2 flex items-center gap-3;
   }
   .lss-property {
-    @apply rounded-md border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-2;
+    @apply py-4 relative border-b border-slate-200 dark:border-slate-700 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors;
   }
   .lss-property-head {
     @apply mb-2 flex items-center gap-2;

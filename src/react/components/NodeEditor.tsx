@@ -56,7 +56,7 @@ export function NodeEditor({
   const invalidExampleIssue = nodeIssues.find((i: any) => i.rule === 'invalid-example');
 
   return (
-    <div className="lss-node" data-depth={depth}>
+    <div className="lss-node" data-depth={depth} id={`node-${node.id}`}>
       {label && <div className="lss-node-label">{label}</div>}
 
       {depth === 0 && (

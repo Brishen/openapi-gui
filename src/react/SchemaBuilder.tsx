@@ -4,6 +4,8 @@ import { NodeEditor } from './components/NodeEditor';
 import { OutputPanel } from './components/OutputPanel';
 import { ImportDialog } from './components/ImportDialog';
 import { HelpDialog } from './components/HelpDialog';
+import { GenerateCodeDialog } from './components/GenerateCodeDialog';
+import { OutlinePanel } from './components/OutlinePanel';
 import { useSchemaBuilder } from './useSchemaBuilder';
 import { IssuesContext } from './IssuesContext';
 
@@ -38,6 +40,7 @@ function UncontrolledBuilder(props: SchemaBuilderProps) {
   const [backend, setBackend] = useState<BackendId | undefined>(props.backend);
   const [importOpen, setImportOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [codegenOpen, setCodegenOpen] = useState(false);
 
   const { model, dispatch, output, issues } = useSchemaBuilder({
     initial: props.defaultValue,
@@ -58,6 +61,8 @@ function UncontrolledBuilder(props: SchemaBuilderProps) {
       className={props.className}
       onImportClick={() => setImportOpen(true)}
       onHelpClick={() => setHelpOpen(true)}
+      onCodegenClick={() => setCodegenOpen(true)}
+      outline={<OutlinePanel model={model} />}
       editor={
         <IssuesContext.Provider value={allIssues}>
           <NodeEditor node={model} dispatch={dispatch} />
@@ -82,6 +87,7 @@ function UncontrolledBuilder(props: SchemaBuilderProps) {
             onImport={(node) => dispatch({ type: 'import', node })}
           />
           <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
+          <GenerateCodeDialog open={codegenOpen} model={model} onClose={() => setCodegenOpen(false)} />
         </>
       }
     />
@@ -95,6 +101,7 @@ function ControlledBuilder(props: SchemaBuilderProps) {
   const [backend, setBackend] = useState<BackendId | undefined>(props.backend);
   const [importOpen, setImportOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [codegenOpen, setCodegenOpen] = useState(false);
 
   const { model, dispatch, output, issues } = useSchemaBuilder({
     initial: props.value,
@@ -122,6 +129,8 @@ function ControlledBuilder(props: SchemaBuilderProps) {
       className={props.className}
       onImportClick={() => setImportOpen(true)}
       onHelpClick={() => setHelpOpen(true)}
+      onCodegenClick={() => setCodegenOpen(true)}
+      outline={<OutlinePanel model={model} />}
       editor={
         <IssuesContext.Provider value={allIssues}>
           <NodeEditor node={model} dispatch={dispatch} />
@@ -146,6 +155,7 @@ function ControlledBuilder(props: SchemaBuilderProps) {
             onImport={(node) => dispatch({ type: 'import', node })}
           />
           <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
+          <GenerateCodeDialog open={codegenOpen} model={model} onClose={() => setCodegenOpen(false)} />
         </>
       }
     />
@@ -154,18 +164,22 @@ function ControlledBuilder(props: SchemaBuilderProps) {
 
 function Layout({
   className,
+  outline,
   editor,
   output,
   dialog,
   onImportClick,
   onHelpClick,
+  onCodegenClick,
 }: {
   className?: string;
+  outline: React.ReactNode;
   editor: React.ReactNode;
   output: React.ReactNode;
   dialog: React.ReactNode;
   onImportClick: () => void;
   onHelpClick: () => void;
+  onCodegenClick: () => void;
 }) {
   return (
     <div className={`lss-root ${className ?? ''}`}>
@@ -175,12 +189,16 @@ function Layout({
           <button className="lss-btn lss-btn-ghost text-slate-500" onClick={onHelpClick}>
             Help
           </button>
+          <button className="lss-btn" onClick={onCodegenClick}>
+            Generate Code…
+          </button>
           <button className="lss-btn" onClick={onImportClick}>
             Import schema…
           </button>
         </div>
       </div>
       <div className="lss-panes">
+        <div className="lss-outline-pane">{outline}</div>
         <div className="lss-editor-pane">{editor}</div>
         <div className="lss-output-pane">{output}</div>
       </div>

@@ -69,3 +69,7 @@ export { validateInstance } from './validate';
 
 // Mock
 export { generateMock } from './mock';
+
+// Codegen
+export type { CodeGenLanguage } from './codegen';
+export { generateCode } from './codegen';
