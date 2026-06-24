@@ -111,7 +111,7 @@ const problems = lint(node, { backend: 'llamacpp' });
 
 ## React UI
 
-![The SchemaBuilder demo: a node-tree editor on the left, live JSON Schema / response_format and lint issues on the right.](docs/demo.png)
+![The SchemaBuilder demo: a node-tree editor on the left, live JSON Schema / response_format and lint issues on the right.](docs/demo.png?v=2)
 
 ```tsx
 import { SchemaBuilder } from '@brishen/llm-json-schema/react';
