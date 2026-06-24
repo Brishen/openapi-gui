@@ -1,10 +1,17 @@
 {
-  "name": "llm-json-schema",
-  "private": true,
+  "name": "@brishen/llm-json-schema",
+  "private": false,
   "version": "0.0.0",
   "type": "module",
   "description": "Build a JSON Schema to constrain LLM output on OpenAI-compatible endpoints (vLLM, llama.cpp), with an optional React UI.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Brishen/openapi-gui.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "sideEffects": [
     "*.css"
   ],
