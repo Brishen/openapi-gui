@@ -104,6 +104,8 @@ const problems = lint(node, { backend: 'llamacpp' });
 
 ## React UI
 
+![The SchemaBuilder demo: a node-tree editor on the left, live JSON Schema / response_format and lint issues on the right.](docs/demo.png)
+
 ```tsx
 import { SchemaBuilder } from 'llm-json-schema/react';
 import 'llm-json-schema/styles.css'; // prebuilt — no Tailwind setup needed
@@ -136,10 +138,15 @@ All UI classes are prefixed `lss-` to avoid collisions in host apps.
 ```sh
 npm run dev        # demo playground (src/demo) on the Vite dev server
 npm test           # vitest: compile, round-trip, Ajv validation, lint rules
+npm run test:e2e   # playwright: drives the demo GUI in a browser
 npm run typecheck  # tsc -b
 npm run lint       # eslint
 npm run build      # library ESM build (dist/) + prebuilt dist/styles.css
 ```
+
+> Playwright needs a browser: `npx playwright install chromium`. The e2e config
+> boots the Vite dev server itself. Regenerate the screenshot above with
+> `node scripts/screenshot.mjs` while the dev server is running.
 
 ### Verifying against a real backend (manual)
 

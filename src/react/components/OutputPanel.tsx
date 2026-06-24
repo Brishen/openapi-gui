@@ -85,7 +85,7 @@ function CodeBlock({ title, code }: { title: string; code: string }) {
           {copied ? 'Copied!' : 'Copy'}
         </button>
       </div>
-      <pre className="lss-pre">
+      <pre className="lss-pre" data-testid="output-code">
         <code>{code}</code>
       </pre>
     </div>

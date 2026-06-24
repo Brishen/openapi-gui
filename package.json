@@ -32,6 +32,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.56.0",
     "@tailwindcss/cli": "^4.1.0",
     "@tailwindcss/vite": "^4.1.0",
     "@types/node": "^24.13.2",
